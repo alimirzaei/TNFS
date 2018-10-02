@@ -24,7 +24,7 @@ def getSyntheticDataset(N = 10000,type = 'linear', indep = 5, dep = 4):
             if(type == 'linear'):
                 X[:, index+j] = (j+2)*X[:, index-1] 
             else:
-                X[:, index+j] = sigmoid(X[:, index-1]*(j+2))
+                X[:, index+j] = sigmoid(X[:, index-1]*(3*float(j)/dep+1))
 
         index = index + dep
     return X
