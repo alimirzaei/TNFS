@@ -2,7 +2,7 @@ from keras.datasets import mnist
 from scipy.io import loadmat
 import numpy as np 
 import matplotlib.pyplot as plt
-from utils import getSyntheticDataset
+from utils import getSyntheticDataset, load_data
 import os
 from AEFS_final import AEFS
 
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     beta = 0.01 
 
 
-    dataset = 'synth_linear_small'
+    dataset = 'channel'
 
     if(dataset == 'face'):
         data = loadmat('/home/ali/data/fs/warpPIE10P.mat')
@@ -36,7 +36,15 @@ if __name__ == '__main__':
         input_dim = 28*28
         hidden = 64
         alpha = 0.01
-    
+    elif(dataset == 'channel'): 
+        X1, X2 = load_data()
+        x_train = X1.reshape(len(X1),-1)
+        x_train = X2.reshape(len(X2),-1)
+        input_shape = (72, 14)
+        input_dim = 72*14
+        hidden = 24
+        alpha = .01
+        beta = .01
     elif(dataset == 'synth_linear_small'):
         x_train = getSyntheticDataset(N=50000, type='linear')
         x_train = x_train/np.max(x_train)
@@ -76,7 +84,7 @@ if __name__ == '__main__':
     if not os.path.exists(directory):
         os.makedirs(directory)
     for i in range(50):
-        result = model.train(x_train, batch_size=16, epochs = 5)
+        result = model.train(x_train, batch_size=16, epochs = 1)
         weights = model.getFeatureWeights()
         fig = plt.figure(figsize=(10,3))
         ax = fig.add_subplot(131)

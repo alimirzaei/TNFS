@@ -27,7 +27,7 @@ class AEFS():
         self.decoded = Dense(input_dim, activation='sigmoid' , kernel_regularizer =self.layer2_reg)(self.encoded)
         self.autoencoder = Model(self.input_img, self.decoded)
         #opt = tf.train.ProximalGradientDescentOptimizer(0.003)
-        self.autoencoder.compile(optimizer= 'Adadelta', loss= self.frob_loss)
+        self.autoencoder.compile(optimizer= 'Adadelta', loss= 'mse')#self.frob_loss)
         self.autoencoder.summary()
 
     

@@ -32,6 +32,8 @@ class TNFS():
         with tf.variable_scope('L2'):
           if(ternary):
             self.output = self._TernaryFC(self.y, input_dim, thresh= thresh, name = '2')
+            self.output = self._TernaryFC(self.output, input_dim, thresh= thresh, name = '3')
+            self.output = self._TernaryFC(self.output, input_dim, thresh= thresh, name = '4')
           else:
             self.output = self._fc(self.y, input_dim, name = '2')
 
@@ -76,9 +78,9 @@ class TNFS():
       c_in = x.get_shape().as_list()[1]
       W = self._get_variable([c_in, c_out], name)
       b = self._get_variable([1, c_out], 'b_'+name)
-      with tf.variable_scope('weights'):
+      with tf.variable_scope('weights'+name):
         W = tw_ternarize(W, thresh)
-      with tf.variable_scope('biases'):
+      with tf.variable_scope('biases'+name):
         b = tw_ternarize(b, thresh)
       x = tf.matmul(x, W) + b
       return x
@@ -113,9 +115,9 @@ class TNFS():
 
 from keras.datasets import mnist
 if __name__ == '__main__':
-    dataset = 'synth' # face , mnist, channel
+    dataset = 'synth_linear_large' # face , mnist, channel
     if(dataset == 'face'):
-        data = loadmat('/home/ali/data/fs/warpPIE10P.mat')
+        data = loadmat('/home/ali/Datasets/fs/warpPIE10P.mat')
         X = data['X']/255.
         X1= X2 = X + .000001
         Y = data['Y']-1
@@ -123,7 +125,7 @@ if __name__ == '__main__':
         input_dim = 44*55
         hidden = 20
         thresh = .4
-        l1 = 0
+        l1 = 0.1
         l2 = 0
     elif(dataset == 'mnist'):
         (x_train, y_train),(_,_) = mnist.load_data()
@@ -146,7 +148,17 @@ if __name__ == '__main__':
         thresh = .9
         l1 = 0
         l2 =0
-    elif(dataset == 'synth'):
+    elif(dataset == 'synth_linear_small'):
+        X1 = getSyntheticDataset(N=10000, indep=5 , dep=4, type='linear')
+        X1 = X1 / np.max(X1)
+        X2 = X1
+        hidden = 5
+        thresh = .5
+        shape = (5, 5)
+        input_dim = 25
+        l1= 0.1 # linear 0.1 is good
+        l2 = 0
+    elif(dataset == 'synth_nonlinear_small'):
         X1 = getSyntheticDataset(N=10000, indep=5 , dep=4, type='nonlinear')
         X1 = X1 / np.max(X1)
         X2 = X1
@@ -156,7 +168,32 @@ if __name__ == '__main__':
         input_dim = 25
         l1= 0.12 # linear 0.1 is good
         l2 = 0
-    model = TNFS(input_dim=input_dim, hidden= hidden, thresh = thresh, l1=l1, l2=l2, ternary=False)
+    elif(dataset == 'synth_linear_large'):
+        X1 = getSyntheticDataset(N=10000, indep=5 , dep=49, type='linear')
+        X1 = X1 / np.max(X1)
+        X2 = X1
+        hidden = 5
+        thresh = .5
+        shape = (5, 50)
+        input_dim = 5*50
+        l1= 0.1 # linear 0.1 is good
+        l2 = 0
+    elif(dataset == 'synth_nonlinear_large'):
+        X1 = getSyntheticDataset(N=10000, indep=5 , dep=49, type='nonlinear')
+        X1 = X1 / np.max(X1)
+        X2 = X1
+        hidden = 5
+        thresh = .5
+        shape = (5, 50)
+        input_dim = 250
+        l1= 0.8 # linear 0.1 is good
+        l2 = 0
+
+    import os
+    directory = 'TNFS/'+dataset
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    model = TNFS(input_dim=input_dim, hidden= hidden, thresh = thresh, l1=l1, l2=l2, ternary=True)
     for i in range(100):
         (w, out, inp) = model.train(X1, X2, num_batchs=500)   
         fig = plt.figure(figsize=(10,3)) 
@@ -168,7 +205,7 @@ if __name__ == '__main__':
         ax.imshow(out[0].reshape(shape))
         ax = fig.add_subplot(1,3,3)
         ax.imshow(inp[0].reshape(shape))
-        fig.savefig('%s/%03d_out.jpg'%(dataset,i))
+        fig.savefig('%s/%03d_out.jpg'%(directory,i))
 
 
 
