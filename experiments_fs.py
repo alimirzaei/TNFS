@@ -53,6 +53,7 @@ if __name__ == '__main__':
         data = loadmat('/home/ali/Datasets/fs/'+dataset)
         
         X = data['X']
+        X = X.astype(float)/255.
         dim = X.shape[1]
         Y = data['Y']-1
         Y = Y.reshape((len(Y),))
@@ -77,11 +78,11 @@ if __name__ == '__main__':
         x_train = X[train_indexes,:]
         y_train = Y[train_indexes]
 
-        scaler = preprocessing.StandardScaler()        
-        x_train = scaler.fit_transform(x_train)
-        x_test = scaler.transform(x_test)
-        rrfs = RRFS(dim)
-        rrfs.train_representation_network(X, name=dataset+'_rep.hd5', epochs=5)
+        #scaler = preprocessing.StandardScaler()        
+        #x_train = scaler.fit_transform(x_train)
+        #x_test = scaler.transform(x_test)
+        rrfs = RRFS(dim, loss='mse')
+        rrfs.train_representation_network(x_train, name=dataset+'_rep.hd5', epochs=100)
         
         ps = [2, 4, 8, 10, 20 , 30, 40 , 50]
         l1s = [0.0001,.001,.005,.01,.05,.1]
@@ -90,7 +91,7 @@ if __name__ == '__main__':
             num_features = int(p*dim/100)
             accs_l1 = np.zeros(len(l1s))
             for index,l1 in enumerate(l1s):
-                w = rrfs.train_fs_network(X, l1=l1, name=dataset+'_fs.hd5', epochs=10)
+                w = rrfs.train_fs_network(x_train, l1=l1, name=dataset+'_fs.hd5', epochs=100, loss='mse')
                 features = np.argsort(w)[-num_features:]
                 accs_l1[index], std = test_kmeans(x_test, y_test, features, number=20)
                 print(accs_l1[index])
