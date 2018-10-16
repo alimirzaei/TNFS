@@ -5,7 +5,7 @@ from keras.models import Model
 from keras.layers import Dense,Input
 import keras.backend as K
 import numpy as np
-
+from keras.callbacks import EarlyStopping
 
 def loss_mse(y, y_true):
     return K.tf.reduce_mean(K.tf.square(y-y_true))
@@ -14,6 +14,7 @@ def loss_mse(y, y_true):
 class RRFS():
     def __init__(self, dim,l1=.01, hidden=10, loss='mse'):
         self.l1 = l1
+        self.early_stopping = EarlyStopping(patience=3)
         x1 = Input((dim,))
         x2 = Dense(hidden, activation='sigmoid')(x1)
         x3 = Dense(dim)(x2)
@@ -38,7 +39,8 @@ class RRFS():
         try:
             self.autoencoder.load_weights(name)
         except:
-            self.autoencoder.fit(X,X, epochs=epochs)
+            
+            self.autoencoder.fit(X,X, epochs=epochs, batch_size=batch_size, callbacks=[self.early_stopping],validation_split=.15, verbose=0)
             self.autoencoder.save_weights(name)
 
     def train_fs_network(self,X ,l1=.01, name='fs_nn.hd5',loss='mse', batch_size=32, epochs = 10):
@@ -51,7 +53,7 @@ class RRFS():
             self.l1 = l1
             self.fs_model.compile(optimizer='adam', loss=loss, metrics=[loss_mse])
             L = self.encoder.predict(X)
-            self.fs_model.fit(X, L, epochs=epochs, batch_size=batch_size)
+            self.fs_model.fit(X, L, epochs=epochs, batch_size=batch_size, callbacks=[self.early_stopping], validation_split=.15, verbose=0)
             self.fs_model.save_weights(name)
         
         w = self.fs_model.layers[1].get_weights()[0]
