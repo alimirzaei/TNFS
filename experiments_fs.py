@@ -14,6 +14,10 @@ from keras.layers import Dense
 from keras.utils.np_utils import to_categorical   
 from keras.callbacks import EarlyStopping
 import pickle
+from sklearn.neural_network import MLPClassifier
+
+
+
 def save_dict(di_, filename_):
     with open(filename_, 'wb') as f:
         pickle.dump(di_, f)
@@ -60,7 +64,21 @@ def test_softmax(x_train, y_train, x_test, y_test, features):
     model.fit(x_train, y_binary_train, epochs=1000, validation_split=.15, verbose=0)
     result = model.evaluate(x_test, y_binary_test)
     return result[1]
-
+def test_mlp(x_train, y_train, x_test, y_test, features):
+    #early_stopping = EarlyStopping(patience=2)
+    x_test = x_test.reshape(len(x_test), -1)
+    x_train = x_train.reshape(len(x_train), -1)
+    x_test = x_test[:,features]
+    x_train = x_train[:,features]
+    classifier = MLPClassifier()
+    #model = Sequential([Dense(num_classes, input_dim = len(features), activation='softmax')])
+    #model.compile(optimizer='adam',loss = 'categorical_crossentropy', metrics=['accuracy'])
+    #y_binary_train = to_categorical(y_train, num_classes=num_classes)
+    #y_binary_test = to_categorical(y_test, num_classes=num_classes)
+    #model.fit(x_train, y_binary_train, epochs=1000, validation_split=.15, verbose=0)
+    classifier.fit(x_train, y_train)
+    result = classifier.score(x_test, y_test)
+    return result*100
 
 
 if __name__ == '__main__':
@@ -128,11 +146,11 @@ if __name__ == '__main__':
             num_features = int(p*dim/100)
             accs_l1 = np.zeros(len(l1s))
             for index,l1 in enumerate(l1s):
-                w = rrfs.train_fs_network(x_train, l1=l1, name=dataset+'_fs.hd5', epochs=1000, loss='mse')
+                w = rrfs.train_fs_network(x_train, l1=l1, name=dataset+'_fs.hd5', epochs=200, loss='mse')
                 features = np.argsort(w)[-num_features:]
                 fatures_ps_l1s[(p,l1)] = features
-                accs_l1[index], std = test_kmeans(x_test, y_test, features, number=20)
-                #accs_l1[index] = test_softmax(x_train, y_train, x_test, y_test, features)
+                #accs_l1[index], std = test_kmeans(x_test, y_test, features, number=20)
+                accs_l1[index] = test_mlp(x_train, y_train, x_test, y_test, features)
                 accs_ps_l1s[(p,l1)]= accs_l1[index]
                 print(accs_l1[index])
             accs_ps[i] = np.max(accs_l1)
