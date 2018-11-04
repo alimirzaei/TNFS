@@ -16,8 +16,8 @@ def main():
     directory = 'results'    
     if not os.path.exists(directory):
         os.makedirs(directory)
-    methods = ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
-    datasets = ['COIL20']#,'Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet', 'mnist']
+    methods = ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap','my_lle', 'my_se', 'my_mds']
+    datasets = ['COIL20','Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet', 'mnist']
     for method in methods:
         result_file_path = '%s/%s.pkl'%(directory, method)
         if(os.path.exists(result_file_path)):
@@ -63,10 +63,11 @@ def main():
                 with open(result_file_path,'wb') as f:
                     pickle.dump(results, f)
 
-                print('p=%d'%p)
+                print(50*'=')
+                print('Method = %s, Dataset = %s, Percent = %d'%(method, dataset, p))
                 print(50*'-')
-                print('%.3f, %.3f'%(clustering_nmi_mean, clustering_accuracy_mean))
-                print('%.3f'%classification_accuracy_mean)
-        
+                print('Clustring (NMI, ACC) = %.3f, %.3f'%(clustering_nmi_mean, clustering_accuracy_mean))
+                print('Classification (ACC) = %.3f'%classification_accuracy_mean)
+                print('Reconstruction (MSE) = %.3f'%reconstruction_mean)
 if __name__ == '__main__':
     main()

@@ -68,11 +68,11 @@ def evaluate_reconstruction(X, selected_features):
     losses = []
     for train_index, test_index in kf.split(X):
         model = Sequential()
-        model.add(Dense(100, input_dim=len(selected_features), activation = 'relu'))
+        model.add(Dense(X.shape[1], input_dim=len(selected_features), activation = 'relu'))
         model.add(Dense(X.shape[1]))
         model.compile(optimizer='Adam', loss='mse')
         X_train, X_test = X[train_index], X[test_index]
-        model.fit(X_train[:,selected_features], X_train, epochs=300)
+        model.fit(X_train[:,selected_features], X_train, epochs=500, verbose=0)
         losses.append(model.evaluate(X_test[:, selected_features], X_test))
     return (np.mean(losses), np.std(losses))
 
