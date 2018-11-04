@@ -6,27 +6,11 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import cross_validate
 from sklearn.manifold import TSNE
 from RRFS import RRFS
+from utils import evaluate_classification, evaluate_clustering, evaluate_reconstruction
 import numpy as np
 import pickle
 import os
 
-
-def evaluate_clustering(selected_features,y):
-    # perform kmeans clustering based on the selected features and repeats 20 times
-    nmi_total = np.zeros(20)
-    acc_total = np.zeros(20)
-    for i in range(0, 20):
-        nmi, acc = unsupervised_evaluation.evaluation(X_selected=selected_features, n_clusters=len(np.unique(y)), y=y)
-        nmi_total[i]= nmi
-        acc_total[i]= acc
-
-    # output the average NMI and average ACC
-    return (np.mean(nmi_total), np.std(nmi_total)), (np.mean(acc_total),np.std(acc_total))
-
-def evaluate_classification(selected_features, y):
-    clf = MLPClassifier()
-    scores = cross_validate(clf, selected_features, y, cv=5, n_jobs=4)
-    return (np.mean(scores['test_score']), np.std(scores['test_score']))
 
 def main():
     directory = 'results'    
@@ -61,25 +45,28 @@ def main():
         score = rrfs.train_fs_network(X,rep=tsne_codes, l1=0.1, name=dataset+'_fs.hd5', epochs=300, loss='mse')
 
         # sort the feature scores in an ascending order according to the feature scores
-        idx = lap_score.feature_ranking(score)
+        idx = np.argsort(score)
 
         # perform evaluation on clustering task
         
         percents = [2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 100]
         
         
-        results[dataset]['mean'] = np.zeros((3, len(percents)))
-        results[dataset]['std'] = np.zeros((3, len(percents)))
+        results[dataset]['mean'] = np.zeros((4, len(percents)))
+        results[dataset]['std'] = np.zeros((4, len(percents)))
+        results[dataset]['feature_ranking'] = idx
         for index,p in enumerate(percents):
             # obtain the dataset on the selected features
             num_fea = int(p*X.shape[1]/100)    # number of selected features
-            selected_features = X[:, idx[0:num_fea]]
+            selected_features = idx[-num_fea:]
+            selected_X = X[:, selected_features]
 
-            (classification_accuracy_mean, classification_accuracy_std) = evaluate_classification(selected_features,y)
-            (clustering_nmi_mean, clustering_nmi_std), (clustering_accuracy_mean, clustering_accuracy_std) = evaluate_clustering(selected_features, y)
+            (classification_accuracy_mean, classification_accuracy_std) = evaluate_classification(selected_X,y)
+            (clustering_nmi_mean, clustering_nmi_std), (clustering_accuracy_mean, clustering_accuracy_std) = evaluate_clustering(selected_X, y)
+            (reconstruction_mean, reconstruction_std) = evaluate_reconstruction(X, selected_features)
             
-            results[dataset]['mean'][:,index] = [classification_accuracy_mean,clustering_accuracy_mean,clustering_nmi_mean]
-            results[dataset]['std'][:,index] = [classification_accuracy_std, clustering_accuracy_std, clustering_nmi_std]
+            results[dataset]['mean'][:,index] = [classification_accuracy_mean,clustering_accuracy_mean,clustering_nmi_mean, reconstruction_mean]
+            results[dataset]['std'][:,index] = [classification_accuracy_std, clustering_accuracy_std, clustering_nmi_std, reconstruction_std]
             
             with open(result_file_path,'wb') as f:
                 pickle.dump(results, f)

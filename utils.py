@@ -1,5 +1,12 @@
 from scipy.io import loadmat
 import numpy as np
+from skfeature.utility import unsupervised_evaluation
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import cross_validate, KFold
+from keras.layers import Dense
+from keras.models import Sequential
+
+
 
 def load_data(dir ='/home/ali/Datasets/Channel', SNR = 22):
     noisy = loadmat(dir + '/My_noisy_H_%d.mat'%SNR)['My_noisy_H']
@@ -35,4 +42,37 @@ if __name__ == '__main__':
 
     print(X[0,:])
 
+
+
+
+def evaluate_clustering(selected_features,y):
+    # perform kmeans clustering based on the selected features and repeats 20 times
+    nmi_total = np.zeros(20)
+    acc_total = np.zeros(20)
+    for i in range(0, 20):
+        nmi, acc = unsupervised_evaluation.evaluation(X_selected=selected_features, n_clusters=len(np.unique(y)), y=y)
+        nmi_total[i]= nmi
+        acc_total[i]= acc
+
+    # output the average NMI and average ACC
+    return (np.mean(nmi_total), np.std(nmi_total)), (np.mean(acc_total),np.std(acc_total))
+
+def evaluate_classification(selected_features, y):
+    clf = MLPClassifier()
+    scores = cross_validate(clf, selected_features, y, cv=5, n_jobs=4)
+    return (np.mean(scores['test_score']), np.std(scores['test_score']))
+
+
+def evaluate_reconstruction(X, selected_features):
+    kf = KFold(n_splits=5, shuffle=True)
+    losses = []
+    for train_index, test_index in kf.split(X):
+        model = Sequential()
+        model.add(Dense(100, input_dim=len(selected_features), activation = 'relu'))
+        model.add(Dense(X.shape[1]))
+        model.compile(optimizer='Adam', loss='mse')
+        X_train, X_test = X[train_index], X[test_index]
+        model.fit(X_train[:,selected_features], X_train, epochs=300)
+        losses.append(model.evaluate(X_test[:, selected_features], X_test))
+    return (np.mean(losses), np.std(losses))
 
