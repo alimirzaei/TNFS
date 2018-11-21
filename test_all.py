@@ -63,10 +63,11 @@ def main():
                 with open(result_file_path,'wb') as f:
                     pickle.dump(results, f)
 
-                print('p=%d'%p)
+                print(50*'=')
+                print('Method = %s, Dataset = %s, Percent = %d'%(method, dataset, p))
                 print(50*'-')
-                print('%.3f, %.3f'%(clustering_nmi_mean, clustering_accuracy_mean))
-                print('%.3f'%classification_accuracy_mean)
-        
+                print('Clustring (NMI, ACC) = %.3f, %.3f'%(clustering_nmi_mean, clustering_accuracy_mean))
+                print('Classification (ACC) = %.3f'%classification_accuracy_mean)
+                print('Reconstruction (MSE) = %.3f'%reconstruction_mean)
 if __name__ == '__main__':
     main()
