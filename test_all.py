@@ -16,8 +16,8 @@ def main():
     directory = 'results'    
     if not os.path.exists(directory):
         os.makedirs(directory)
-    methods = ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
-    datasets = ['COIL20']#,'Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet', 'mnist']
+    methods =['aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
+    datasets = ['COIL20','Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet']
     for method in methods:
         result_file_path = '%s/%s.pkl'%(directory, method)
         if(os.path.exists(result_file_path)):

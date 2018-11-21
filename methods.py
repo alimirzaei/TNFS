@@ -86,4 +86,29 @@ def udfs_score(X, y, gamma=.1):
     idx = feature_ranking(Weight)
     return idx
 
+from AEFS_final import AEFS
+def aefs(X, y=None):
+    aefs = AEFS(input_dim=X.shape[1], encoding_dim=10)
+    aefs.train(X, batch_size=32, epochs=150)
+    weights = aefs.getFeatureWeights()
+    idx = np.argsort(weights)[::-1]
+    return idx
+
+from skfeature.function.sparse_learning_based import MCFS as MCFS_CLASS
+def MCFS(X, y=None):
+    # construct affinity matrix
+    kwargs = {"metric": "euclidean", "neighborMode": "knn", "weightMode": "heatKernel", "k": 5, 't': 1}
+    W = construct_W.construct_W(X, **kwargs)
+
+    num_cluster = len(np.unique(y))  
+
+    # obtain the feature weight matrix
+    Weight = MCFS_CLASS.mcfs(X, n_selected_features=X.shape[1], W=W, n_clusters=num_cluster)
+
+    # sort the feature scores in an ascending order according to the feature scores
+    idx = MCFS_CLASS.feature_ranking(Weight)
+
+    return idx
+    
+
 
