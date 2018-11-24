@@ -5,7 +5,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import cross_validate, KFold
 from keras.layers import Dense
 from keras.models import Sequential
-
+import keras.backend as K
+import gc
 
 
 def load_data(dir ='/home/ali/Datasets/Channel', SNR = 22):
@@ -74,5 +75,7 @@ def evaluate_reconstruction(X, selected_features):
         X_train, X_test = X[train_index], X[test_index]
         model.fit(X_train[:,selected_features], X_train, epochs=500, verbose=0)
         losses.append(model.evaluate(X_test[:, selected_features], X_test))
+        K.clear_session()
+    gc.collect()
     return (np.mean(losses), np.std(losses))
 
