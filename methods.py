@@ -112,3 +112,24 @@ def MCFS(X, y=None):
     
 
 
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input
+
+def my_autoencoder(X, y=None, l1 = .1, n_components=2):
+    rrfs = RRFS(X.shape[1], hidden=n_components)
+    input_tensor = Input(shape=(X.shape[1],))
+    l1 = Dense(10, activation='relu')(input_tensor)
+    l2 = Dense(n_components, activation='relu')(l1)
+    l3 = Dense(10, activation='relu')(l2)
+    output_tensor = Dense(X.shape[1])(l3)
+    model = Model(input_tensor, output_tensor)
+    encoder = Model(input_tensor, l2)
+    model.compile(optimizer='adam', loss='mse')                                
+    model.fit(X, X, epochs=300)
+    codes = encoder.predict(X)
+    codes = (codes-np.min(codes))/(np.max(codes)-np.min(codes))
+    #rrfs.train_representation_network(x_train, name=dataset+'_rep.hd5', epochs=1000)
+    score = rrfs.train_fs_network(X,rep=codes, l1=l1, epochs=300, loss='mse')
+    # sort the feature scores in an ascending order according to the feature scores
+    idx = np.argsort(score)[::-1]
+    return idx
