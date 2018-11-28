@@ -16,7 +16,7 @@ def main():
     directory = 'results'    
     if not os.path.exists(directory):
         os.makedirs(directory)
-    methods =['aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
+    methods =['MCFS','aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
     datasets = ['COIL20','Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet']
     for method in methods:
         result_file_path = '%s/%s.pkl'%(directory, method)
@@ -27,28 +27,35 @@ def main():
             results={}
         
         for dataset in datasets:
-            if(dataset in results.keys()):
-                print('READ RESULTS DATASET %s SUCCESSFULLY'%dataset)
-                continue
-            results[dataset] = {}        
             # load data
             mat = io.loadmat('/home/ali/Datasets/fs/%s.mat'%dataset)
             X = mat['X']    # data
             X = X.astype(float)
             y = mat['Y']    # label
             y = y[:, 0]
+            percents = [2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 100]
+            if(dataset not in results.keys()):
+                results[dataset] = {}
+                idx = getattr(method_functions, method)(X, y) 
+                results[dataset]['mean'] = np.zeros((4, len(percents)))
+                results[dataset]['std'] = np.zeros((4, len(percents)))
+                results[dataset]['feature_ranking'] = idx
+            else:
+                idx = results[dataset]['feature_ranking']
+           
 
-            idx = getattr(method_functions, method)(X, y) 
+            
             # perform evaluation on clustering task
             
-            percents = [2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 100]
             
             
-            results[dataset]['mean'] = np.zeros((4, len(percents)))
-            results[dataset]['std'] = np.zeros((4, len(percents)))
-            results[dataset]['feature_ranking'] = idx
+            
+
             for index,p in enumerate(percents):
                 # obtain the dataset on the selected features
+                if(results[dataset]['mean'][0,index]!=0):
+                    print('load %s, %s, %d'%(method, dataset, p))
+                    continue
                 num_fea = int(p*X.shape[1]/100)    # number of selected features
                 selected_features = idx[:num_fea]
                 selected_X = X[:, selected_features]

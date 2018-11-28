@@ -19,7 +19,7 @@ def main():
     if not os.path.exists(directory):
         os.makedirs(directory)
     method ='my_autoencoder'# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
-    datasets = ['RELATHE']#['COIL20','Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet']
+    datasets = ['BASEHOCK']#['COIL20','Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet']
     result_file_path = '%s/%s.pkl'%(directory, method)
     if(os.path.exists(result_file_path)):
         with open(result_file_path, 'rb') as f:

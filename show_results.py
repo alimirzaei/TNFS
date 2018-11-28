@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 directory = 'results'
-methods = glob('results/*.pkl')
+methods = glob('results/other/*.pkl')
 
 datasets = ['COIL20','PCMAC','BASEHOCK','RELATHE' ,'Isolet'] #'Yale' 'Prostate_GE
 
