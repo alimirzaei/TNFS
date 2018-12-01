@@ -13,7 +13,7 @@ import os
 import methods as method_functions
 
 def main():
-    directory = 'results'    
+    directory = 'results/other'    
     if not os.path.exists(directory):
         os.makedirs(directory)
     methods =['MCFS','aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
