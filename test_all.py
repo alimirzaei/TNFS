@@ -17,7 +17,7 @@ def main():
     if not os.path.exists(directory):
         os.makedirs(directory)
     methods =['MCFS','aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
-    datasets = ['COIL20','Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet']
+    datasets = ['COIL20','PCMAC','BASEHOCK','RELATHE' ,'Isolet']
     for method in methods:
         result_file_path = '%s/%s.pkl'%(directory, method)
         if(os.path.exists(result_file_path)):
@@ -36,7 +36,7 @@ def main():
             percents = [2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 100]
             if(dataset not in results.keys()):
                 results[dataset] = {}
-                idx = getattr(method_functions, method)(X, y) 
+                idx = getattr(method_functions, method)(X, y, dataset=dataset) 
                 results[dataset]['mean'] = np.zeros((4, len(percents)))
                 results[dataset]['std'] = np.zeros((4, len(percents)))
                 results[dataset]['feature_ranking'] = idx
