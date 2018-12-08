@@ -7,10 +7,12 @@ Gets to 99.25% test accuracy after 12 epochs
 from __future__ import print_function
 import keras
 from keras.datasets import mnist
-from keras.models import Sequential
+from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
+import matplotlib.pyplot as plt
+from RRFS import RRFS
 
 batch_size = 128
 num_classes = 10
@@ -20,7 +22,7 @@ epochs = 12
 img_rows, img_cols = 28, 28
 
 # the data, split between train and test sets
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+(x_train, y_train_l), (x_test, y_test_l) = mnist.load_data()
 
 if K.image_data_format() == 'channels_first':
     x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
@@ -40,8 +42,8 @@ print(x_train.shape[0], 'train samples')
 print(x_test.shape[0], 'test samples')
 
 # convert class vectors to binary class matrices
-y_train = keras.utils.to_categorical(y_train, num_classes)
-y_test = keras.utils.to_categorical(y_test, num_classes)
+y_train = keras.utils.to_categorical(y_train_l, num_classes)
+y_test = keras.utils.to_categorical(y_test_l, num_classes)
 
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
@@ -51,20 +53,35 @@ model.add(Conv2D(64, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.25))
 model.add(Flatten())
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.5))
+model.add(Dense(2, activation='sigmoid', name='hidden'))
 model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
 
-model.fit(x_train, y_train,
-          batch_size=batch_size,
-          epochs=epochs,
-          verbose=1,
-          validation_data=(x_test, y_test))
-model.save_weights('mnist.hd5')
+# model.fit(x_train, y_train,
+#           batch_size=batch_size,
+#           epochs=epochs,
+#           verbose=1,
+#           validation_data=(x_test, y_test))
+# model.save_weights('mnist.hd5')
+model.load_weights('mnist_2d.hd5')
+
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer('hidden').output)
+codes = intermediate_layer_model.predict(x_train)
+
+
+#f = K.function([model.layers[0].input], [model.layers[-2].output])
+#print(x_test.shape)
+#codes = f([x_train])[0]
+plt.scatter(codes[:,0], codes[:,1], c=y_train_l)
+plt.show()
+#rrfs = RRFS((28*28, hidden=2))
+#score = rrfs.train_fs_network(x_train.reshape(-1,28*28),rep=codes, l1=0.1, epochs=300, loss='mse')
+
 score = model.evaluate(x_test, y_test, verbose=0)
+
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])

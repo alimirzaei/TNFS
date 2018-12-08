@@ -5,7 +5,19 @@ from skfeature.utility.sparse_learning import feature_ranking
 from skfeature.function.similarity_based import lap_score
 from skfeature.utility import construct_W
 import numpy as np
+from mnist_model import getCodes
 
+
+
+def my_supervised_mnist(X, y=None, l1=.1):
+    if(X.shape[1] != 28*28):
+        print("Error Dataset")
+        return range(len(X.shape[1]))
+    rrfs = RRFS(28*28, hidden=2)
+    codes = getCodes(X.reshape(X.shape[0],28,28,1))
+    score = rrfs.train_fs_network(X,rep=codes, l1=l1, epochs=300, loss='mse')
+    idx = np.argsort(score)[::-1]
+    return idx
 
 def my_isomap(X, y=None, l1 = .1, n_components=2):
     rrfs = RRFS(X.shape[1], hidden=n_components)
