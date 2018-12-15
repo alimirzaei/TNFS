@@ -9,7 +9,7 @@ from mnist_model import getCodes
 
 
 
-def my_supervised_mnist(X, y=None, l1=.1):
+def my_supervised_mnist(X, y=None, l1=.1, **kwargs):
     if(X.shape[1] != 28*28):
         print("Error Dataset")
         return range(len(X.shape[1]))
@@ -31,7 +31,7 @@ def my_isomap(X, y=None, l1 = .1, n_components=2):
     return idx
 
 
-def my_tsne(X, y=None,l1 = .1, n_components=2):
+def my_tsne(X, y=None,l1 = .1, n_components=2, **kwargs):
     rrfs = RRFS(X.shape[1], hidden=n_components)
     model = TSNE(n_components=n_components)
     codes = model.fit_transform(X)
@@ -43,7 +43,7 @@ def my_tsne(X, y=None,l1 = .1, n_components=2):
     return idx
 
 
-def my_lle(X, y=None,l1 = .1, n_components=2):
+def my_lle(X, y=None,l1 = .1, n_components=2, **kwargs):
     rrfs = RRFS(X.shape[1], hidden=n_components)
     model = LocallyLinearEmbedding(n_components=n_components)
     codes = model.fit_transform(X)
@@ -55,7 +55,7 @@ def my_lle(X, y=None,l1 = .1, n_components=2):
     return idx
 
 
-def my_mds(X, y=None,l1 = .1, n_components=2):
+def my_mds(X, y=None,l1 = .1, n_components=2, **kwargs):
     rrfs = RRFS(X.shape[1], hidden=n_components)
     model = MDS(n_components=n_components)
     codes = model.fit_transform(X)
@@ -68,7 +68,7 @@ def my_mds(X, y=None,l1 = .1, n_components=2):
 
 
 
-def my_se(X, y=None,l1 = .1, n_components=2):
+def my_se(X, y=None,l1 = .1, n_components=2, **kwargs):
     rrfs = RRFS(X.shape[1], hidden=n_components)
     model = SpectralEmbedding(n_components=n_components)
     codes = model.fit_transform(X)
@@ -80,7 +80,7 @@ def my_se(X, y=None,l1 = .1, n_components=2):
     return idx
 
 
-def laplacian_score(X, y=None):
+def laplacian_score(X, y=None, **kwargs):
     # construct affinity matrix
     kwargs_W = {"metric": "euclidean", "neighbor_mode": "knn", "weight_mode": "heat_kernel", "k": 5, 't': 1}
     W = construct_W.construct_W(X, **kwargs_W)
@@ -93,13 +93,13 @@ def laplacian_score(X, y=None):
 
     return idx
 
-def udfs_score(X, y, gamma=.1):
+def udfs_score(X, y, gamma=.1, **kwargs):
     Weight = UDFS.udfs(X, gamma=gamma, n_clusters=len(np.unique(y)))
     idx = feature_ranking(Weight)
     return idx
 
 from AEFS_final import AEFS
-def aefs(X, y=None):
+def aefs(X, y=None, **kwargs):
     aefs = AEFS(input_dim=X.shape[1], encoding_dim=10)
     aefs.train(X, batch_size=32, epochs=150)
     weights = aefs.getFeatureWeights()
@@ -107,7 +107,7 @@ def aefs(X, y=None):
     return idx
 
 from skfeature.function.sparse_learning_based import MCFS as MCFS_CLASS
-def MCFS(X, y=None):
+def MCFS(X, y=None, **kwargs):
     # construct affinity matrix
     kwargs = {"metric": "euclidean", "neighborMode": "knn", "weightMode": "heatKernel", "k": 5, 't': 1}
     W = construct_W.construct_W(X, **kwargs)
@@ -127,7 +127,7 @@ def MCFS(X, y=None):
 from keras.models import Sequential, Model
 from keras.layers import Dense, Input
 
-def my_autoencoder(X, y=None, l1 = .1, n_components=2):
+def my_autoencoder(X, y=None, l1 = .1, n_components=2, **kwargs):
     rrfs = RRFS(X.shape[1], hidden=n_components)
     input_tensor = Input(shape=(X.shape[1],))
     l1 = Dense(10, activation='relu')(input_tensor)
@@ -157,3 +157,7 @@ def sup_fisher():
 def sup_CIFE():
     pass
 
+from scipy.io import loadmat
+def GAFS(X, y=None, dataset=None, **kwargs):
+    res = loadmat('GAFS_result.mat')
+    return res[dataset][0]-1
