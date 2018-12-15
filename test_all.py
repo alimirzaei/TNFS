@@ -13,11 +13,11 @@ import os
 import methods as method_functions
 
 def main():
-    directory = 'results/other'    
+    directory = 'results'    
     if not os.path.exists(directory):
         os.makedirs(directory)
-    methods =['MCFS','aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
-    datasets = ['COIL20','PCMAC','BASEHOCK','RELATHE' ,'Isolet']
+    methods =['laplacian_score', 'my_tsne']
+    datasets = ['mnist_subset','COIL20','PCMAC','BASEHOCK','RELATHE' ,'Isolet']
     for method in methods:
         result_file_path = '%s/%s.pkl'%(directory, method)
         if(os.path.exists(result_file_path)):
@@ -55,19 +55,19 @@ def main():
 
             for index,p in enumerate(percents):
                 # obtain the dataset on the selected features
-                if(results[dataset]['mean'][0,index]!=0):
-                    print('load %s, %s, %d'%(method, dataset, p))
-                    continue
+                #if(results[dataset]['mean'][0,index]!=0):
+                #    print('load %s, %s, %d'%(method, dataset, p))
+                #    continue
                 num_fea = int(p*X.shape[1]/100)    # number of selected features
                 selected_features = idx[:num_fea]
                 selected_X = X[:, selected_features]
 
-                (classification_accuracy_mean, classification_accuracy_std) = evaluate_classification(selected_X,y)
-                (clustering_nmi_mean, clustering_nmi_std), (clustering_accuracy_mean, clustering_accuracy_std) = evaluate_clustering(selected_X, y)
+                #(classification_accuracy_mean, classification_accuracy_std) = evaluate_classification(selected_X,y)
+                #(clustering_nmi_mean, clustering_nmi_std), (clustering_accuracy_mean, clustering_accuracy_std) = evaluate_clustering(selected_X, y)
                 (reconstruction_mean, reconstruction_std) = evaluate_reconstruction(X, selected_features)
                 
-                results[dataset]['mean'][:,index] = [classification_accuracy_mean,clustering_accuracy_mean,clustering_nmi_mean, reconstruction_mean]
-                results[dataset]['std'][:,index] = [classification_accuracy_std, clustering_accuracy_std, clustering_nmi_std, reconstruction_std]
+                results[dataset]['mean'][3,index] = reconstruction_mean#[classification_accuracy_mean,clustering_accuracy_mean,clustering_nmi_mean, reconstruction_mean]
+                results[dataset]['std'][3,index] = reconstruction_std#[classification_accuracy_std, clustering_accuracy_std, clustering_nmi_std, reconstruction_std]
                 
                 with open(result_file_path,'wb') as f:
                     pickle.dump(results, f)
@@ -75,8 +75,8 @@ def main():
                 print(50*'=')
                 print('Method = %s, Dataset = %s, Percent = %d'%(method, dataset, p))
                 print(50*'-')
-                print('Clustring (NMI, ACC) = %.3f, %.3f'%(clustering_nmi_mean, clustering_accuracy_mean))
-                print('Classification (ACC) = %.3f'%classification_accuracy_mean)
+                #print('Clustring (NMI, ACC) = %.3f, %.3f'%(clustering_nmi_mean, clustering_accuracy_mean))
+                #print('Classification (ACC) = %.3f'%classification_accuracy_mean)
                 print('Reconstruction (MSE) = %.3f'%reconstruction_mean)
 if __name__ == '__main__':
     main()

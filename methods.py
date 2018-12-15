@@ -9,7 +9,7 @@ from mnist_model import getCodes
 
 
 
-def my_supervised_mnist(X, y=None, l1=.1):
+def my_supervised_mnist(X, y=None, l1=.1, **kwargs):
     if(X.shape[1] != 28*28):
         print("Error Dataset")
         return range(len(X.shape[1]))
