@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 
 directory = 'results'
-methods = glob('results/other/*.pkl')
+methods = glob('results/new/other/*.pkl')
 
-datasets = ['COIL20','PCMAC','BASEHOCK','RELATHE' ,'Isolet'] #'Yale' 'Prostate_GE
+datasets = ['COIL20','PCMAC','BASEHOCK','RELATHE' ,'Isolet','mnist_subset'] #'Yale' 'Prostate_GE
 
 fig = plt.figure(figsize=(len(datasets)*3, 3))
 

@@ -145,3 +145,15 @@ def my_autoencoder(X, y=None, l1 = .1, n_components=2):
     # sort the feature scores in an ascending order according to the feature scores
     idx = np.argsort(score)[::-1]
     return idx
+
+
+def sup_ttest():
+    pass
+
+
+def sup_fisher():
+    pass
+
+def sup_CIFE():
+    pass
+

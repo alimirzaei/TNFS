@@ -16,7 +16,7 @@ def main():
     directory = 'results/other'    
     if not os.path.exists(directory):
         os.makedirs(directory)
-    methods =['my_supervised_mnist']#['my_supervised_mnist','my_tsne']#['MCFS','aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
+    methods =['MCFS','aefs', 'laplacian_score']#['my_supervised_mnist','my_tsne']#['MCFS','aefs']# ['udfs_score',  'laplacian_score', 'my_tsne', 'my_isomap']
     datasets = ['mnist_subset']##['COIL20','Yale','PCMAC','BASEHOCK','RELATHE','Prostate_GE' ,'Isolet']
     for method in methods:
         result_file_path = '%s/%s.pkl'%(directory, method)
